@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Social Trend Analysis - Chart Analysis</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="css/bootstrap.css" rel="stylesheet">
+
+    <!-- Add custom CSS here -->
+    <link href="css/modern-business.css" rel="stylesheet">
+    <link href="font-awesome/css/font-awesome.min.css" rel="stylesheet">
+	<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+	<script type="text/javascript" src="http://www.amcharts.com/lib/3/amcharts.js"></script>
+<script type="text/javascript" src="http://www.amcharts.com/lib/3/pie.js"></script>
+<script type="text/javascript" src="http://www.amcharts.com/lib/3/themes/none.js"></script>
+<style>
+#chartdiv {
+	width		: 100%;
+	height		: 500px;
+	font-size	: 11px;
+}
+</style>
+	
+</head>
+
+<body>
+
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="index.html">Social Trend Analysis</a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse navbar-ex1-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li><a href="about.html">About</a>
+                    </li>
+                    <li><a href="mapanalysis.html">Analysis using Maps</a>
+                    </li>
+                    <li class="active"><a href="chartanalysis.html">Analysis using Charts</a>
+                    </li>
+                    
+                           
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+    <div class="container">
+
+        <div class="row">
+
+            <div class="col-lg-12">
+                <h1 class="page-header">Analysis using Charts
+                    
+                </h1>
+                <ol class="breadcrumb">
+                    <li><a href="index.html">Home</a>
+                    </li>
+                    <li class="active">Analysis using Charts</li>
+                </ol>
+            </div>
+
+        </div>
+        <script>
+			andr = [];
+$(document).ready(function(){
+		$("#btn2").click(function() {
+		
+		var country_KDM = $("#ddlcountry option:selected").text();
+		//var lat="";
+		//var longi="";
+        query = $("#query").val();
+        qstr = 'q=' + escape(query);
+		var params = getstandardargs().concat(qstr);
+        var urlData = params.join('&');
+       // url = url+urlData;
+		//alert(url);
+		
+		$.ajaxSetup({ crossDomain: true, scriptCharset: "utf-8" , contentType: "jsonp; charset=utf-8"});
+		$.ajax({
+	//	var options = {
+			type : "GET", 
+	//        url : url,		
+	    	url : "http://134.193.136.127:8983/solr/collection1_shard1_replica1/select?wt=json&indent=true&hl=true&hl.fl=,features&json.wrf=loadData",data:{"q":'id:'+country_KDM+''}, 
+	//		async : false, cache : false,
+			contentType: "application/json",
+			dataType : "jsonp",
+            jsonp : "callback",			
+			jsonpCallback : "loadData",
+			success : function(data, textStatus, jqXHR) {
+			//alert("Hello");
+			initialize();
+				//alert("success") 
+
+       			},
+			error : function(XMLHttpRequest, textStatus, errorThrown) {
+			//alert("Hello");
+				alert("error");
+			}
+		})
+		
+		
+
+});
+});
+
+function loadData(data) 
+{
+//alert("Load Data"+data);
+$.each(data.response.docs,function(i,doc){
+//lat = doc.lat_s;
+//longi = doc.long_s;
+andr[i] =doc.Count_s;
+
+}
+);
+}
+//alert(andr[0]+" "+andr[1]);
+function getstandardargs() {
+var params = [
+'wt=json'
+, 'indent=on'
+, 'hl=true'
+, 'hl.fl=,features'
+, 'json.wrf=loadData'
+];
+
+return params;
+}
+
+function initialize() {
+var chart = AmCharts.makeChart("chartdiv", {
+    "type": "pie",
+    "theme": "none",
+    "dataProvider": [{
+        "OS": "Android",
+        "users": andr[0]
+    }, {
+        "OS": "Chrome",
+        "users": andr[1]
+    }, {
+        "OS": "Mac",
+        "users": andr[2]
+    }, {
+        "OS": "Windows",
+        "users": andr[3]
+    }, {
+        "OS": "linux",
+        "users": andr[5]
+    }],
+    "valueField": "users",
+    "titleField": "OS",
+    "outlineAlpha": 0.4,
+    "depth3D": 15,
+    "balloonText": "[[title]]<br><span style='font-size:14px'><b>[[users]]</b> ([[percents]]%)</span>",
+    "angle": 30,
+    "exportConfig":{	
+      menuItems: [{
+      icon: '/lib/3/images/export.png',
+      format: 'png'	  
+      }]  
+	}
+});
+}
+</script>
+          
+
+        <div class="row">
+
+            <div class="col-lg-12">
+			
+<div id="chartdiv"></div>
+            </div>
+
+        </div>
+		<div class="row">
+		  <label>Select Country:</label>
+		  <select name="country_KDM" id="ddlcountry">
+<option value="Adelaide_KDM" {{#if grpSelected}} selected="selected">Adelaide</option>
+<option value="Alaska_KDM" {{#if grpSelected}} selected="selected">Alaska</option>
+<option value="Almaty_KDM" {{#if grpSelected}} selected="selected">Almaty</option>
+<option value="Amsterdam_KDM" {{#if grpSelected}} selected="selected">Amsterdam</option>
+<option value="Arizona_KDM" {{#if grpSelected}} selected="selected">Arizona</option>
+<option value="Astana_KDM" {{#if grpSelected}} selected="selected">Astana</option>
+<option value="Athens_KDM" {{#if grpSelected}} selected="selected">Athens</option>
+<option value="Auckland_KDM" {{#if grpSelected}} selected="selected">Auckland</option>
+<option value="Azores_KDM" {{#if grpSelected}} selected="selected">Azores</option>
+<option value="Baghdad_KDM" {{#if grpSelected}} selected="selected">Baghdad</option>
+<option value="Baku_KDM" {{#if grpSelected}} selected="selected">Baku</option>
+<option value="Bangkok_KDM" {{#if grpSelected}} selected="selected">Bangkok</option>
+<option value="Beijing_KDM" {{#if grpSelected}} selected="selected">Beijing</option>
+<option value="Belgrade_KDM" {{#if grpSelected}} selected="selected">Belgrade</option>
+<option value="Berlin_KDM" {{#if grpSelected}} selected="selected">Berlin</option>
+<option value="Bern_KDM" {{#if grpSelected}} selected="selected">Bern</option>
+<option value="Bogota_KDM" {{#if grpSelected}} selected="selected">Bogota</option>
+<option value="Brasilia_KDM" {{#if grpSelected}} selected="selected">Brasilia</option>
+<option value="Bratislava_KDM" {{#if grpSelected}} selected="selected">Bratislava</option>
+<option value="Brisbane_KDM" {{#if grpSelected}} selected="selected">Brisbane</option>
+<option value="Brussels_KDM" {{#if grpSelected}} selected="selected">Brussels</option>
+<option value="Bucharest_KDM" {{#if grpSelected}} selected="selected">Bucharest</option>
+<option value="Budapest_KDM" {{#if grpSelected}} selected="selected">Budapest</option>
+<option value="Cairo_KDM" {{#if grpSelected}} selected="selected">Cairo</option>
+<option value="Canberra_KDM" {{#if grpSelected}} selected="selected">Canberra</option>
+<option value="Caracas_KDM" {{#if grpSelected}} selected="selected">Caracas</option>
+<option value="Casablanca_KDM" {{#if grpSelected}} selected="selected">Casablanca</option>
+<option value="Chennai_KDM" {{#if grpSelected}} selected="selected">Chennai</option>
+<option value="Chihuahua_KDM" {{#if grpSelected}} selected="selected">Chihuahua</option>
+<option value="Chongqing_KDM" {{#if grpSelected}} selected="selected">Chongqing</option>
+<option value="Copenhagen_KDM" {{#if grpSelected}} selected="selected">Copenhagen</option>
+<option value="Darwin_KDM" {{#if grpSelected}} selected="selected">Darwin</option>
+<option value="Dhaka_KDM" {{#if grpSelected}} selected="selected">Dhaka</option>
+<option value="Dublin_KDM" {{#if grpSelected}} selected="selected">Dublin</option>
+<option value="Edinburgh_KDM" {{#if grpSelected}} selected="selected">Edinburgh</option>
+<option value="Ekaterinburg_KDM" {{#if grpSelected}} selected="selected">Ekaterinburg</option>
+<option value="Fiji_KDM" {{#if grpSelected}} selected="selected">Fiji</option>
+<option value="Georgetown_KDM" {{#if grpSelected}} selected="selected">Georgetown</option>
+<option value="Guadalajara_KDM" {{#if grpSelected}} selected="selected">Guadalajara</option>
+<option value="Hanoi_KDM" {{#if grpSelected}} selected="selected">Hanoi</option>
+<option value="Harare_KDM" {{#if grpSelected}} selected="selected">Harare</option>
+<option value="Hawaii_KDM" {{#if grpSelected}} selected="selected">Hawaii</option>
+<option value="Helsinki_KDM" {{#if grpSelected}} selected="selected">Helsinki</option>
+<option value="Hobart_KDM" {{#if grpSelected}} selected="selected">Hobart</option>
+<option value="Irkutsk_KDM" {{#if grpSelected}} selected="selected">Irkutsk</option>
+<option value="Islamabad_KDM" {{#if grpSelected}} selected="selected">Islamabad</option>
+<option value="Istanbul_KDM" {{#if grpSelected}} selected="selected">Istanbul</option>
+<option value="Jakarta_KDM" {{#if grpSelected}} selected="selected">Jakarta</option>
+<option value="Jerusalem_KDM" {{#if grpSelected}} selected="selected">Jerusalem</option>
+<option value="Kabul_KDM" {{#if grpSelected}} selected="selected">Kabul</option>
+<option value="Kamchatka_KDM" {{#if grpSelected}} selected="selected">Kamchatka</option>
+<option value="Karachi_KDM" {{#if grpSelected}} selected="selected">Karachi</option>
+<option value="Kathmandu_KDM" {{#if grpSelected}} selected="selected">Kathmandu</option>
+<option value="Kolkata_KDM" {{#if grpSelected}} selected="selected">Kolkata</option>
+<option value="Krasnoyarsk_KDM" {{#if grpSelected}} selected="selected">Krasnoyarsk</option>
+<option value="Kuwait_KDM" {{#if grpSelected}} selected="selected">Kuwait</option>
+<option value="Kyiv_KDM" {{#if grpSelected}} selected="selected">Kyiv</option>
+<option value="Lima_KDM" {{#if grpSelected}} selected="selected">Lima</option>
+<option value="Lisbon_KDM" {{#if grpSelected}} selected="selected">Lisbon</option>
+<option value="Ljubljana_KDM" {{#if grpSelected}} selected="selected">Ljubljana</option>
+<option value="London_KDM" {{#if grpSelected}} selected="selected">London</option>
+<option value="Madrid_KDM" {{#if grpSelected}} selected="selected">Madrid</option>
+<option value="Magadan_KDM" {{#if grpSelected}} selected="selected">Magadan</option>
+<option value="Melbourne_KDM" {{#if grpSelected}} selected="selected">Melbourne</option>
+<option value="Minsk_KDM" {{#if grpSelected}} selected="selected">Minsk</option>
+<option value="Monrovia_KDM" {{#if grpSelected}} selected="selected">Monrovia</option>
+<option value="Monterrey_KDM" {{#if grpSelected}} selected="selected">Monterrey</option>
+<option value="Moscow_KDM" {{#if grpSelected}} selected="selected">Moscow</option>
+<option value="Mumbai_KDM" {{#if grpSelected}} selected="selected">Mumbai</option>
+<option value="Muscat_KDM" {{#if grpSelected}} selected="selected">Muscat</option>
+<option value="Nairobi_KDM" {{#if grpSelected}} selected="selected">Nairobi</option>
+<option value="Newfoundland_KDM" {{#if grpSelected}} selected="selected">Newfoundland</option>
+<option value="Novosibirsk_KDM" {{#if grpSelected}} selected="selected">Novosibirsk</option>
+<option value="Nuku'alofa_KDM" {{#if grpSelected}} selected="selected">Nuku'alofa</option>
+<option value="Osaka_KDM" {{#if grpSelected}} selected="selected">Osaka</option>
+<option value="Paris_KDM" {{#if grpSelected}} selected="selected">Paris</option>
+<option value="Perth_KDM" {{#if grpSelected}} selected="selected">Perth</option>
+<option value="Prague_KDM" {{#if grpSelected}} selected="selected">Prague</option>
+<option value="Pretoria_KDM" {{#if grpSelected}} selected="selected">Pretoria</option>
+<option value="Quito_KDM" {{#if grpSelected}} selected="selected">Quito</option>
+<option value="Rangoon_KDM" {{#if grpSelected}} selected="selected">Rangoon</option>
+<option value="Riga_KDM" {{#if grpSelected}} selected="selected">Riga</option>
+<option value="Riyadh_KDM" {{#if grpSelected}} selected="selected">Riyadh</option>
+<option value="Rome_KDM" {{#if grpSelected}} selected="selected">Rome</option>
+<option value="Samoa_KDM" {{#if grpSelected}} selected="selected">Samoa</option>
+<option value="Santiago_KDM" {{#if grpSelected}} selected="selected">Santiago</option>
+<option value="Sapporo_KDM" {{#if grpSelected}} selected="selected">Sapporo</option>
+<option value="Sarajevo_KDM" {{#if grpSelected}} selected="selected">Sarajevo</option>
+<option value="Saskatchewan_KDM" {{#if grpSelected}} selected="selected">Saskatchewan</option>
+<option value="Seoul_KDM" {{#if grpSelected}} selected="selected">Seoul</option>
+<option value="Singapore_KDM" {{#if grpSelected}} selected="selected">Singapore</option>
+<option value="Skopje_KDM" {{#if grpSelected}} selected="selected">Skopje</option>
+<option value="Sofia_KDM" {{#if grpSelected}} selected="selected">Sofia</option>
+<option value="Stockholm_KDM" {{#if grpSelected}} selected="selected">Stockholm</option>
+<option value="Sydney_KDM" {{#if grpSelected}} selected="selected">Sydney</option>
+<option value="Taipei_KDM" {{#if grpSelected}} selected="selected">Taipei</option>
+<option value="Tallinn_KDM" {{#if grpSelected}} selected="selected">Tallinn</option>
+<option value="Tashkent_KDM" {{#if grpSelected}} selected="selected">Tashkent</option>
+<option value="Tbilisi_KDM" {{#if grpSelected}} selected="selected">Tbilisi</option>
+<option value="Tehran_KDM" {{#if grpSelected}} selected="selected">Tehran</option>
+<option value="Tijuana_KDM" {{#if grpSelected}} selected="selected">Tijuana</option>
+<option value="Tokyo_KDM" {{#if grpSelected}} selected="selected">Tokyo</option>
+<option value="Vienna_KDM" {{#if grpSelected}} selected="selected">Vienna</option>
+<option value="Vilnius_KDM" {{#if grpSelected}} selected="selected">Vilnius</option>
+<option value="Vladivostok_KDM" {{#if grpSelected}} selected="selected">Vladivostok</option>
+<option value="Warsaw_KDM" {{#if grpSelected}} selected="selected">Warsaw</option>
+<option value="Wellington_KDM" {{#if grpSelected}} selected="selected">Wellington</option>
+				  
+          </select>
+
+
+            <input type="button" class="btn btn-success" id="btn2" value="Analyse Tweets" />
+			</div>
+
+    </div>
+    <!-- /.container -->
+	
+	<div class="container">        
+        <footer>
+            <div class="row">
+                <div class="footer">
+                    <p>Copyright @ UMKC KDM SPRING 2014</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+    <!-- /.container -->
+
+    <!-- JavaScript -->
+    <script src="js/jquery-1.10.2.js"></script>
+    <script src="js/bootstrap.js"></script>
+    <script src="js/modern-business.js"></script>
+
+</body>
+
+</html>
